@@ -1,0 +1,96 @@
+$border-color: #ccc;
+
+.chinese-chess{
+  height: 100%;
+
+  .container{
+    width: 550px;
+    height: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+
+    .wrapper{
+      flex: 1;
+      padding-top: 113%;
+      position: relative;
+
+      .chess-board{
+        top: 0;
+        width: 100%;
+        position: absolute;
+        border: 1px solid $border-color;
+        box-sizing: border-box;
+        border-spacing: 0;
+        border-collapse: collapse;
+
+        td{
+          padding-top: 12.2%;
+          border: 1px solid $border-color;
+          position: relative;
+        }
+
+        .chu-river{
+          position: relative;
+
+          >div{
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            text-align: center;
+            font-size: 250%;
+
+            &:before{
+              content: '楚河';
+              vertical-align: middle;
+              margin-right: 35%;
+            }
+
+            &:after{
+              content: '汉界';
+              vertical-align: middle;
+            }
+          }
+        }
+        //.chu-river end
+
+        .diagonal{
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          overflow: hidden;
+
+          &.d1:before, &.d2:before{
+            content: '';
+            position: absolute;
+            width: 300%;
+            height: 1px;
+            background-color: $border-color;
+            top: 0;
+            left: -100%;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+          }
+
+          &.d1:before{
+            transform: rotateZ(45deg);
+          }
+
+          &.d2:before{
+            transform: rotateZ(-45deg);
+          }
+        }
+        //.diagonal end
+      }
+      //.chess-board end
+    }
+    //.wrapper end
+  }
+  //.container end
+}

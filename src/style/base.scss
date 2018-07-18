@@ -1,0 +1,17 @@
+@import "./normalize.css";
+
+html{
+  height: 100%;
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+body{
+  color: #333;
+  height: 100%;
+  line-height: 1.42857143;
+}
+
+#app{
+  height: 100%;
+}
+
