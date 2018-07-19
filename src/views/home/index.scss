@@ -1,4 +1,37 @@
-$border-color: #ccc;
+$border-color: #999;
+$serif-spacing: 3px;
+
+@mixin absolute-fill{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+@mixin serif-upper-left{
+  top: $serif-spacing;
+  left: $serif-spacing;
+  border-top: 1px solid $border-color;
+  border-left: 1px solid $border-color;
+}
+@mixin serif-upper-right{
+  top: $serif-spacing;
+  right: $serif-spacing;
+  border-top: 1px solid $border-color;
+  border-right: 1px solid $border-color;
+}
+@mixin serif-lower-left{
+  left: $serif-spacing;
+  bottom: $serif-spacing;
+  border-left: 1px solid $border-color;
+  border-bottom: 1px solid $border-color;
+}
+@mixin serif-lower-right{
+  right: $serif-spacing;
+  bottom: $serif-spacing;
+  border-right: 1px solid $border-color;
+  border-bottom: 1px solid $border-color;
+}
 
 .chinese-chess{
   height: 100%;
@@ -16,7 +49,7 @@ $border-color: #ccc;
       padding-top: 113%;
       position: relative;
 
-      .chess-board{
+      .chessboard{
         top: 0;
         width: 100%;
         position: absolute;
@@ -35,11 +68,7 @@ $border-color: #ccc;
           position: relative;
 
           >div{
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            @include absolute-fill;
             text-align: center;
             font-size: 250%;
 
@@ -58,14 +87,10 @@ $border-color: #ccc;
         //.chu-river end
 
         .diagonal{
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
+          @include absolute-fill;
           overflow: hidden;
 
-          &.d1:before, &.d2:before{
+          &.diagonal-ac:before, &.diagonal-bd:before{
             content: '';
             position: absolute;
             width: 300%;
@@ -76,17 +101,64 @@ $border-color: #ccc;
             right: 0;
             bottom: 0;
             margin: auto;
+            transform-origin: center center;
           }
 
-          &.d1:before{
+          &.diagonal-ac:before{
             transform: rotateZ(45deg);
           }
 
-          &.d2:before{
+          &.diagonal-bd:before{
             transform: rotateZ(-45deg);
           }
         }
         //.diagonal end
+
+        .serif{
+          @include absolute-fill;
+
+          &:before, &:after{
+            content: '';
+            position: absolute;
+            width: 13%;
+            height: 13%;
+          }
+
+          &.serif-lower-left:after{
+            @include serif-lower-left;
+          }
+
+          &.serif-lower-right:after{
+            @include serif-lower-right;
+          }
+
+          &.serif-upper-left:after{
+            @include serif-upper-left;
+          }
+
+          &.serif-upper-right:after{
+            @include serif-upper-right;
+          }
+
+          &.serif-diagonal-ac{
+            &:before{
+              @include serif-upper-left;
+            }
+            &:after{
+              @include serif-lower-right;
+            }
+          }
+
+          &.serif-diagonal-bd{
+            &:before{
+              @include serif-upper-right;
+            }
+            &:after{
+              @include serif-lower-left;
+            }
+          }
+        }
+        //serif end
       }
       //.chess-board end
     }
