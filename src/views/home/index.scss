@@ -1,5 +1,6 @@
 $border-color: #999;
-$serif-spacing: 3px;
+$serif-spacing: 4%;
+$chess-size: 90%;
 
 @mixin absolute-fill{
   position: absolute;
@@ -64,7 +65,7 @@ $serif-spacing: 3px;
           position: relative;
         }
 
-        .chu-river{
+        .river{
           position: relative;
 
           >div{
@@ -73,18 +74,17 @@ $serif-spacing: 3px;
             font-size: 250%;
 
             &:before{
-              content: '楚河';
+              content: '';
               vertical-align: middle;
               margin-right: 35%;
             }
 
             &:after{
-              content: '汉界';
+              content: '';
               vertical-align: middle;
             }
           }
-        }
-        //.chu-river end
+        } //.chu-river end
 
         .diagonal{
           @include absolute-fill;
@@ -111,8 +111,7 @@ $serif-spacing: 3px;
           &.diagonal-bd:before{
             transform: rotateZ(-45deg);
           }
-        }
-        //.diagonal end
+        } //.diagonal end
 
         .serif{
           @include absolute-fill;
@@ -157,12 +156,35 @@ $serif-spacing: 3px;
               @include serif-lower-left;
             }
           }
-        }
-        //serif end
-      }
-      //.chess-board end
-    }
-    //.wrapper end
-  }
-  //.container end
+        } //serif end
+
+        .chess-pos{
+          position: absolute;
+          width: $chess-size;
+          height: $chess-size;
+          top: -$chess-size / 2;
+          left: -$chess-size / 2;
+          border: 1px solid #ccc;
+          box-sizing: border-box;
+
+          &.last-col{
+            left: auto;
+            right: -$chess-size / 2;
+          }
+
+          &.last-row{
+            top: auto;
+            bottom: -$chess-size / 2;
+          }
+
+          &.last-pos{
+            top: auto;
+            left: auto;
+            right: -$chess-size / 2;
+            bottom: -$chess-size / 2;
+          }
+        } //.chess-pos end
+      } //.chess-board end
+    } //.wrapper end
+  } //.container end
 }

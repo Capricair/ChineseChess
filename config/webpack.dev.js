@@ -4,8 +4,10 @@ let htmlWebpackPlugin = require("html-webpack-plugin");
 module.exports = {
     mode: "development",
     entry: './src/index.js',
+    devtool: "#eval-source-map",
     plugins: [
         new htmlWebpackPlugin({
+            filename: "index.html",
             template: "./src/index.html",
             hash: true,
             title: "中国象棋",
