@@ -3,7 +3,7 @@ let htmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
     mode: "development",
-    entry: './src/index.js',
+    entry: "./src/index.js",
     devtool: "#eval-source-map",
     plugins: [
         new htmlWebpackPlugin({
@@ -18,21 +18,23 @@ module.exports = {
         rules: [
             {
                 test: /\.(js|jsx)$/,
-                use: ['babel-loader'],
+                use: ["babel-loader"],
             },
             {
                 test: /\.css$/,
-                use: ['style-loader', 'css-loader'],
+                use: ["style-loader", "css-loader"],
             },
             {
                 test: /\.scss$/,
+                use: ["style-loader", "css-loader", "sass-loader"],
+            },
+            {
+                test: /\.(gif|jpg|jpeg|png|svg)$/,
                 use: [
-                    'style-loader',
-                    'css-loader',
                     {
-                        loader: "sass-loader",
+                        loader: "file-loader",
                         options: {
-                            sourceMap: true,
+                            limit: 1024
                         }
                     }
                 ],

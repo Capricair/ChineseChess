@@ -3,7 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import {BrowserRouter as Router, Route, Redirect} from "react-router-dom";
 
-import ChineseChess from "./views/home/index";
+import ChineseChess from "./views/main/index";
 
 const Routes = (
     <Router>

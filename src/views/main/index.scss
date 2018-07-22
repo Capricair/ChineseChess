@@ -1,6 +1,8 @@
 $border-color: #999;
 $serif-spacing: 4%;
 $chess-size: 90%;
+$piece-red: #d9534f;
+$piece-black: #333;
 
 @mixin absolute-fill{
   position: absolute;
@@ -164,7 +166,7 @@ $chess-size: 90%;
           height: $chess-size;
           top: -$chess-size / 2;
           left: -$chess-size / 2;
-          border: 1px solid #ccc;
+          //border: 1px solid #ccc;
           box-sizing: border-box;
 
           &.last-col{
@@ -184,6 +186,35 @@ $chess-size: 90%;
             bottom: -$chess-size / 2;
           }
         } //.chess-pos end
+
+        .chess-piece{
+          color: $piece-black;
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-sizing: border-box;
+          font-size: 40px;
+          border-radius: 1000px;
+          background-position: center center;
+          background-size: contain;
+          background-blend-mode: lighten;
+          //border: 2px solid currentColor;
+          //background-color: #fff;
+
+          &.chess-piece-red{
+            color: $piece-red;
+          }
+
+          >img{
+            width: 100%;
+            height: 100%;
+          }
+        }//.chess-piece end
       } //.chess-board end
     } //.wrapper end
   } //.container end
