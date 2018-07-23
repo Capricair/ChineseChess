@@ -73,17 +73,29 @@ $piece-black: #333;
           >div{
             @include absolute-fill;
             text-align: center;
-            font-size: 250%;
 
             &:before{
               content: '';
-              vertical-align: middle;
-              margin-right: 35%;
+              position: absolute;
+              top: 10%;
+              left: 0;
+              bottom: 10%;
+              width: 50%;
+              box-sizing: border-box;
+              background: url("../../../static/images/river1.png") no-repeat center;
+              background-size: contain;
             }
 
             &:after{
               content: '';
-              vertical-align: middle;
+              position: absolute;
+              top: 10%;
+              right: 0;
+              bottom: 10%;
+              width: 50%;
+              box-sizing: border-box;
+              background: url("../../../static/images/river2.png") no-repeat center;
+              background-size: contain;
             }
           }
         } //.chu-river end
