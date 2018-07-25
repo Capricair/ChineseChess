@@ -4,6 +4,12 @@ $chess-size: 90%;
 $piece-red: #d9534f;
 $piece-black: #333;
 
+$brand-primary: #428bca;
+$brand-success: #5cb85c;
+$brand-info:    #5bc0de;
+$brand-warning: #f0ad4e;
+$brand-danger:  #d9534f;
+
 @mixin absolute-fill{
   position: absolute;
   top: 0;
@@ -34,6 +40,18 @@ $piece-black: #333;
   bottom: $serif-spacing;
   border-right: 1px solid $border-color;
   border-bottom: 1px solid $border-color;
+}
+
+@keyframes twinkle {
+  0%{
+    opacity: 1;
+  }
+  50%{
+    opacity: 0;
+  }
+  100%{
+    opacity: 1;
+  }
 }
 
 .chinese-chess{
@@ -219,7 +237,7 @@ $piece-black: #333;
           //background-color: #fff;
 
           &.chess-piece-red{
-            color: $piece-red;
+            color: darken($piece-red, 10%);
           }
 
           >img{
@@ -227,6 +245,61 @@ $piece-black: #333;
             height: 100%;
           }
         }//.chess-piece end
+
+        .piece-selected{
+          animation: twinkle 1.5s ease 0s infinite;
+        }//.piece-selected end
+
+        .piece-valid{
+          &:before{
+            content: '';
+            @include absolute-fill;
+            width: 20%;
+            height: 20%;
+            border-radius: 1000px;
+            margin: auto;
+            background-color: $brand-success;
+            z-index: 1000;
+          }
+        }//.piece-valid end
+
+        .piece-moved{
+          &:before, &:after, >div:before, >div:after{
+            color: #00ADEF;
+            content: '';
+            position: absolute;
+            width: 20%;
+            height: 20%;
+          }
+
+          &:before{
+            top: -5%;
+            left: -5%;
+            border-top: 2px solid currentColor;
+            border-left: 2px solid currentColor;
+          }
+
+          &:after{
+            top: -5%;
+            right: -5%;
+            border-top: 2px solid currentColor;
+            border-right: 2px solid currentColor;
+          }
+
+          >div:before{
+            bottom: -5%;
+            left: -5%;
+            border-bottom: 2px solid currentColor;
+            border-left: 2px solid currentColor;
+          }
+
+          >div:after{
+            bottom: -5%;
+            right: -5%;
+            border-bottom: 2px solid currentColor;
+            border-right: 2px solid currentColor;
+          }
+        }//.piece-moved end
       } //.chess-board end
     } //.wrapper end
   } //.container end

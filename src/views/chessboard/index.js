@@ -1,8 +1,8 @@
 import "./index.scss";
 import React from "react";
 import BaseComponent from "../base/index";
-import {King, Rook, Knight, Bishop, Guard, Cannon, Pawn} from "../piece/index";
-import {PieceType, PieceColor} from "../../enums/index";
+import {PieceType, PieceColor, BoardSize, MovePosCalc} from "../../enums/index";
+import {Bishop, Cannon, Guard, King, Knight, Pawn, Rook} from "../piece";
 
 let DiagonalPos = [
     {pos: ["1,4", "2,5", "8,4", "9,5"], value: <div className="diagonal diagonal-ac"/>},
@@ -18,7 +18,7 @@ let SerifPos = [
     {pos: ["3,1", "3,7", "7,2", "7,8"], value: <div className="serif serif-diagonal-bd"/>},
 ];
 
-let PieceComponentNameEnum = {
+let PieceComponentEnum = {
     [PieceType.King]: King,
     [PieceType.Rook]: Rook,
     [PieceType.Knight]: Knight,
@@ -36,7 +36,10 @@ export default class ChessBoard extends BaseComponent {
     constructor(props) {
         super(props);
         this.state = {
-            data: {},
+            pieces: {},
+            active: PieceColor.Red,
+            selected: null,
+            validPos: {},
         };
     }
 
@@ -48,74 +51,137 @@ export default class ChessBoard extends BaseComponent {
         let colors = this.props.perspective === PieceColor.Black
             ? [PieceColor.Red, PieceColor.Black] : [PieceColor.Black, PieceColor.Red];
         let pieces = {
-            "1,1": {x: 1, y: 1, type: PieceType.Rook, color: colors[0]},
-            "1,2": {x: 2, y: 1, type: PieceType.Knight, color: colors[0]},
-            "1,3": {x: 3, y: 1, type: PieceType.Bishop, color: colors[0]},
-            "1,4": {x: 4, y: 1, type: PieceType.Guard, color: colors[0]},
-            "1,5": {x: 5, y: 1, type: PieceType.King, color: colors[0]},
-            "1,6": {x: 6, y: 1, type: PieceType.Guard, color: colors[0]},
-            "1,7": {x: 7, y: 1, type: PieceType.Bishop, color: colors[0]},
-            "1,8": {x: 8, y: 1, type: PieceType.Knight, color: colors[0]},
-            "1,9": {x: 9, y: 1, type: PieceType.Rook, color: colors[0]},
-            "3,2": {x: 2, y: 3, type: PieceType.Cannon, color: colors[0]},
-            "3,8": {x: 8, y: 3, type: PieceType.Cannon, color: colors[0]},
-            "4,1": {x: 1, y: 4, type: PieceType.Pawn, color: colors[0]},
-            "4,3": {x: 3, y: 4, type: PieceType.Pawn, color: colors[0]},
-            "4,5": {x: 5, y: 4, type: PieceType.Pawn, color: colors[0]},
-            "4,7": {x: 7, y: 4, type: PieceType.Pawn, color: colors[0]},
-            "4,9": {x: 9, y: 4, type: PieceType.Pawn, color: colors[0]},
+            "1,1": {y: 1, x: 1, type: PieceType.Rook, color: colors[0]},
+            "1,2": {y: 1, x: 2, type: PieceType.Knight, color: colors[0]},
+            "1,3": {y: 1, x: 3, type: PieceType.Bishop, color: colors[0]},
+            "1,4": {y: 1, x: 4, type: PieceType.Guard, color: colors[0]},
+            "1,5": {y: 1, x: 5, type: PieceType.King, color: colors[0]},
+            "1,6": {y: 1, x: 6, type: PieceType.Guard, color: colors[0]},
+            "1,7": {y: 1, x: 7, type: PieceType.Bishop, color: colors[0]},
+            "1,8": {y: 1, x: 8, type: PieceType.Knight, color: colors[0]},
+            "1,9": {y: 1, x: 9, type: PieceType.Rook, color: colors[0]},
+            "3,2": {y: 3, x: 2, type: PieceType.Cannon, color: colors[0]},
+            "3,8": {y: 3, x: 8, type: PieceType.Cannon, color: colors[0]},
+            "4,1": {y: 4, x: 1, type: PieceType.Pawn, color: colors[0]},
+            "4,3": {y: 4, x: 3, type: PieceType.Pawn, color: colors[0]},
+            "4,5": {y: 4, x: 5, type: PieceType.Pawn, color: colors[0]},
+            "4,7": {y: 4, x: 7, type: PieceType.Pawn, color: colors[0]},
+            "4,9": {y: 4, x: 9, type: PieceType.Pawn, color: colors[0]},
         };
         Object.keys(pieces).forEach((key) => {
             let p = pieces[key];
-            pieces[`${11 - p.y},${p.x}`] = {x: p.x, y: 11 - p.y, type: p.type, color: colors[1]};
+            pieces[`${BoardSize.Height + 1 - p.y},${p.x}`] = {
+                x: p.x,
+                y: BoardSize.Height + 1 - p.y,
+                type: p.type, color: colors[1],
+            };
         });
         this.setState({
-            data: pieces
+            pieces: pieces
         });
     }
 
-    positionClickHandler(i, j) {
-
+    getAllPieceData(){
+        return this.state.pieces;
     }
 
-    getPosValue(pos, i, j) {
+    getPieceData(y, x) {
+        return this.state.pieces[`${y},${x}`];
+    }
+
+    getSelectedPiece() {
+        return this.state.selected;
+    }
+
+    getActiveColor() {
+        return this.state.active;
+    }
+
+    getValidPos(y, x){
+        return this.state.validPos;
+    }
+
+    select(y, x) {
+        let piece = this.getPieceData(y, x);
+        if (piece && piece.color === this.getActiveColor()) {
+            let calc = MovePosCalc[piece.type];
+            let validPos = {};
+            if (typeof calc === "function"){
+                validPos = calc(piece, {x: x, y: y}, this.getAllPieceData());
+            }
+            this.setState({
+                selected: piece,
+                validPos: validPos,
+            })
+        }
+    }
+
+    move(y, x) {
+        let piece = this.getPieceData(y, x);
+        if (piece) {
+
+        }
+    }
+
+    positionClickHandler(y, x) {
+        let {selected} = this.state;
+        if (!selected) {
+            this.select(y, x);
+        } else if (selected && selected.x !== x && selected.y !== y) {
+
+        }
+    }
+
+    getPosValue(pos, y, x) {
         for (let item of pos) {
-            if (item.pos.includes(`${i},${j}`)) {
+            if (item.pos.includes(`${y},${x}`)) {
                 return item.value;
             }
         }
         return null;
     }
 
-    createChessPiece(type, color){
-        let piece = React.createElement(PieceComponentNameEnum[type], {color: color});
-        return piece;
+    createChessPiece(type, color) {
+        return React.createElement(PieceComponentEnum[type], {color: color});
     }
 
-    createChessPosition(x, y, classNames) {
-        let chess = null;
-        let data = this.state.data[`${x},${y}`];
-        if (data){
-            chess = this.createChessPiece(data.type, data.color);
+    createChessPosition(y, x, classNames) {
+        let pieceComponent = null;
+        let pieceData = this.getPieceData(y, x);
+        if (pieceData) {
+            let selected = this.getSelectedPiece();
+            pieceComponent = this.createChessPiece(pieceData.type, pieceData.color);
+            if (selected && pieceData.x === selected.x && pieceData.y === selected.y) {
+                //如果当前棋子是选中的棋子
+                pieceComponent = (
+                    <div className="piece-selected">{pieceComponent}</div>
+                );
+            }
+        }
+        let validPos = this.getValidPos();
+        if (validPos[`${y},${x}`]){
+            pieceComponent = (
+                <div className="piece-valid">{pieceComponent}</div>
+            )
         }
         return (
-            <div key={`${x}-${y}-${classNames}`}
-                 data-pos={`${x},${y}`}
+            <div key={`${y}-${x}-${classNames}`}
+                 data-pos={`${y},${x}`}
                  className={classNames}
                  onClick={() => {
-                     this.positionClickHandler(x, y)
+                     this.positionClickHandler(y, x)
                  }}>
-                {chess}
+                {pieceComponent}
             </div>
         )
     }
 
-    getChessPosition(i, j) {
+    getPiecePosition(i, j) {
         let pos = [this.createChessPosition(i, j, "chess-pos")];
         let lastCol = this.createChessPosition(i, j + 1, "chess-pos last-col");
         let lastRow = this.createChessPosition(i + 1, j, "chess-pos last-row");
         let lastPos = this.createChessPosition(i + 1, j + 1, "chess-pos last-pos");
-        let padding = null;
+        let padding = [];
         if ([4, 9].includes(i) && j === 8) {
             padding = [lastCol, lastRow, lastPos];
         } else if (j === 8) {
@@ -126,7 +192,7 @@ export default class ChessBoard extends BaseComponent {
         return pos.concat(padding);
     }
 
-    getChessBoard() {
+    getChessboard() {
         let rows = [];
         let river = (
             <td colSpan={10} className="river">
@@ -139,12 +205,12 @@ export default class ChessBoard extends BaseComponent {
                 for (let j = 1; j < 9; j++) {
                     let diagonal = this.getPosValue(DiagonalPos, i, j);
                     let serif = this.getPosValue(SerifPos, i, j);
-                    let chessPos = this.getChessPosition(i, j);
+                    let position = this.getPiecePosition(i, j);
                     cols.push((
                         <td key={`${i}-${j}`}>
                             {diagonal}
                             {serif}
-                            {chessPos}
+                            {position}
                         </td>
                     ))
                 }
@@ -163,6 +229,6 @@ export default class ChessBoard extends BaseComponent {
     }
 
     render() {
-        return this.getChessBoard();
+        return this.getChessboard();
     }
 }
