@@ -28,6 +28,26 @@ let PieceComponentEnum = {
     [PieceType.Pawn]: Pawn,
 };
 
+function SetPawnCommonProps(pawn) {
+    let initY = pawn.y;
+    Object.defineProperties(pawn, {
+        initY: {
+            get: function () {
+                return initY;
+            }
+        },
+        isCrossRiver: {
+            get: function () {
+                if (initY === 4) {
+                    return pawn.y > 5;
+                } else {
+                    return pawn.y < 6;
+                }
+            }
+        }
+    })
+}
+
 export default class ChessBoard extends BaseComponent {
     static defaultProps = {
         perspective: PieceColor.Red,
@@ -70,18 +90,24 @@ export default class ChessBoard extends BaseComponent {
         };
         Object.keys(pieces).forEach((key) => {
             let p = pieces[key];
-            pieces[`${p.x},${BoardSize.Height + 1 - p.y}`] = {
-                x: p.x,
-                y: BoardSize.Height + 1 - p.y,
+            let x = p.x;
+            let y = BoardSize.Height + 1 - p.y;
+            pieces[`${x},${y}`] = {
+                x: x,
+                y: y,
                 type: p.type, color: colors[1],
             };
+            if (p.type === PieceType.Pawn) {
+                SetPawnCommonProps(pieces[key]);
+                SetPawnCommonProps(pieces[`${x},${y}`]);
+            }
         });
         this.setState({
             pieces: pieces
         });
     }
 
-    getAllPieceData(){
+    getAllPieceData() {
         return this.state.pieces;
     }
 
@@ -97,7 +123,7 @@ export default class ChessBoard extends BaseComponent {
         return this.state.active;
     }
 
-    getValidPos(){
+    getValidPos() {
         return this.state.validPos;
     }
 
@@ -106,8 +132,8 @@ export default class ChessBoard extends BaseComponent {
         if (piece && piece.color === this.getActiveColor()) {
             let calc = MovePosCalc[piece.type];
             let validPos = {};
-            if (typeof calc === "function"){
-                validPos = calc(piece, this.getAllPieceData());
+            if (typeof calc === "function") {
+                validPos = calc(piece, this.getAllPieceData()) || {};
             }
             this.setState({
                 selected: piece,
@@ -159,7 +185,7 @@ export default class ChessBoard extends BaseComponent {
             }
         }
         let validPos = this.getValidPos();
-        if (validPos[`${x},${y}`]){
+        if (validPos[`${x},${y}`]) {
             pieceComponent = (
                 <div className="piece-valid">{pieceComponent}</div>
             )
@@ -192,7 +218,7 @@ export default class ChessBoard extends BaseComponent {
         return pos.concat(padding);
     }
 
-    getChessboard() {
+    render() {
         let rows = [];
         let river = (
             <td colSpan={10} className="river">
@@ -226,9 +252,5 @@ export default class ChessBoard extends BaseComponent {
                 <tbody>{rows}</tbody>
             </table>
         );
-    }
-
-    render() {
-        return this.getChessboard();
     }
 }
