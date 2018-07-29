@@ -3,6 +3,7 @@ import React from "react";
 import BaseComponent from "../base/index";
 import {PieceType, PieceColor, BoardSize, MovePosCalc} from "../../enums/index";
 import {Bishop, Cannon, Guard, King, Knight, Pawn, Rook} from "../piece";
+import _ from "lodash";
 
 let DiagonalPos = [
     {pos: ["4,1", "5,2", "4,8", "5,9"], value: <div className="diagonal diagonal-ac"/>},
@@ -63,11 +64,7 @@ export default class ChessBoard extends BaseComponent {
         };
     }
 
-    componentDidMount() {
-        this.init();
-    }
-
-    init() {
+    get defaultPieces() {
         let colors = this.props.perspective === PieceColor.Black
             ? [PieceColor.Red, PieceColor.Black] : [PieceColor.Black, PieceColor.Red];
         let pieces = {
@@ -102,8 +99,24 @@ export default class ChessBoard extends BaseComponent {
                 SetPawnCommonProps(pieces[`${x},${y}`]);
             }
         });
+        return pieces;
+    }
+
+    get defaultSelected() {
+        return null;
+    }
+
+    get defaultValidPos() {
+        return {};
+    }
+
+    componentDidMount() {
+        this.init();
+    }
+
+    init() {
         this.setState({
-            pieces: pieces
+            pieces: this.defaultPieces
         });
     }
 
@@ -142,19 +155,39 @@ export default class ChessBoard extends BaseComponent {
         }
     }
 
-    move(x, y) {
-        let piece = this.getPieceData(x, y);
-        if (piece) {
+    deselect(x, y) {
+        this.setState({
+            selected: this.defaultSelected,
+            validPos: this.defaultValidPos,
+        })
+    }
 
+    move(x, y) {
+        let {pieces} = this.state;
+        let piece = _.cloneDeep(this.getPieceData(x, y));
+        let selected = _.cloneDeep(this.getSelectedPiece());
+        if (selected && !piece) {
+            delete pieces[`${selected.x},${selected.y}`];
+            selected.x = x;
+            selected.y = y;
+            pieces[`${x},${y}`] = selected;
+            this.deselect(x, y);
+            this.setState({
+                pieces: pieces,
+            });
         }
     }
 
     positionClickHandler(x, y) {
         let {selected} = this.state;
-        if (!selected) {
+        if (selected) {
+            if (selected.x === x && selected.y === y) {
+                this.deselect(x, y);
+            } else {
+                this.move(x, y);
+            }
+        } else {
             this.select(x, y);
-        } else if (selected && selected.x !== x && selected.y !== y) {
-
         }
     }
 

@@ -207,14 +207,13 @@ export default {
     },
     [PieceType.Pawn]: function (target, pieces) {
         let pos = {};
-        let moveForward = `${target.x},${target.initY === 4 ? target.y + 1 : target.y - 1}`;
-        let map = [moveForward];
+        let map = [{pos: `${target.x},${target.initY === 4 ? target.y + 1 : target.y - 1}`}];
         if (target.isCrossRiver) {
-            map.push(`${target.x + 1},${target.y}`);
-            map.push(`${target.x - 1},${target.y}`);
+            map.push({pos: `${target.x + 1},${target.y}`});
+            map.push({pos: `${target.x - 1},${target.y}`});
         }
         map.forEach((p) => {
-            let [x, y] = p.split(",").map(x => parseInt(x));
+            let [x, y] = p.pos.split(",").map(x => parseInt(x));
             if (x > 0 && x <= BoardSize.Width && y > 0 && y <= BoardSize.Height
                 && (!pieces[p.pos] || pieces[p.pos].color !== target.color)) {
                 pos[p.pos] = {x: x, y: y};
