@@ -164,7 +164,7 @@ export default class ChessBoard extends BaseComponent {
 
     move(x, y) {
         let {pieces} = this.state;
-        let piece = _.cloneDeep(this.getPieceData(x, y));
+        let piece = this.getPieceData(x, y);
         let selected = _.cloneDeep(this.getSelectedPiece());
         if (selected && !piece) {
             delete pieces[`${selected.x},${selected.y}`];
