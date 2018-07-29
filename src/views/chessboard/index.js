@@ -33,11 +33,13 @@ function SetPawnCommonProps(pawn) {
     let initY = pawn.y;
     Object.defineProperties(pawn, {
         initY: {
+            enumerable: true,
             get: function () {
                 return initY;
             }
         },
         isCrossRiver: {
+            enumerable: true,
             get: function () {
                 if (initY === 4) {
                     return pawn.y > 5;
@@ -57,10 +59,11 @@ export default class ChessBoard extends BaseComponent {
     constructor(props) {
         super(props);
         this.state = {
-            pieces: {},
+            pieces: this.defaultPieces,
             active: PieceColor.Red,
-            selected: null,
-            validPos: {},
+            selected: this.defaultSelected,
+            validPos: this.defaultValidPos,
+            move: this.defaultMove,
         };
     }
 
@@ -110,21 +113,23 @@ export default class ChessBoard extends BaseComponent {
         return {};
     }
 
+    get defaultMove() {
+        return {from: "", to: ""};
+    }
+
     componentDidMount() {
         this.init();
     }
 
     init() {
-        this.setState({
-            pieces: this.defaultPieces
-        });
+
     }
 
-    getAllPieceData() {
+    getAllPiece() {
         return this.state.pieces;
     }
 
-    getPieceData(x, y) {
+    getPiece(x, y) {
         return this.state.pieces[`${x},${y}`];
     }
 
@@ -140,17 +145,22 @@ export default class ChessBoard extends BaseComponent {
         return this.state.validPos;
     }
 
+    getMove() {
+        return this.state.move;
+    }
+
     select(x, y) {
-        let piece = this.getPieceData(x, y);
+        let piece = this.getPiece(x, y);
         if (piece && piece.color === this.getActiveColor()) {
             let calc = MovePosCalc[piece.type];
             let validPos = {};
             if (typeof calc === "function") {
-                validPos = calc(piece, this.getAllPieceData()) || {};
+                validPos = calc(piece, this.getAllPiece()) || validPos;
             }
             this.setState({
                 selected: piece,
                 validPos: validPos,
+                move: this.defaultMove,
             })
         }
     }
@@ -162,29 +172,49 @@ export default class ChessBoard extends BaseComponent {
         })
     }
 
+    isValidMove(x, y) {
+        return this.state.validPos[`${x},${y}`];
+    }
+
+    capture(selected, capturing) {
+        let pieces = this.getAllPiece();
+        if (capturing && capturing.color !== selected.color) {
+            delete pieces[`${capturing.x},${capturing.y}`];
+        }
+    }
+
     move(x, y) {
         let {pieces} = this.state;
-        let piece = this.getPieceData(x, y);
+        let piece = this.getPiece(x, y);
         let selected = _.cloneDeep(this.getSelectedPiece());
-        if (selected && !piece) {
-            delete pieces[`${selected.x},${selected.y}`];
+        let from = `${selected.x},${selected.y}`;
+        let to = `${x},${y}`;
+        if (selected) {
+            this.capture(selected, piece);
+            delete pieces[from];
             selected.x = x;
             selected.y = y;
-            pieces[`${x},${y}`] = selected;
+            pieces[to] = selected;
             this.deselect(x, y);
             this.setState({
                 pieces: pieces,
+                move: {from: from, to: to}
             });
         }
     }
 
     positionClickHandler(x, y) {
-        let {selected} = this.state;
+        let selected = this.getSelectedPiece();
+        let piece = this.getPiece(x, y);
         if (selected) {
-            if (selected.x === x && selected.y === y) {
-                this.deselect(x, y);
+            if (piece && piece.color === selected.color) {
+                this.select(x, y);
             } else {
-                this.move(x, y);
+                if (selected.x === x && selected.y === y) {
+                    this.deselect(x, y);
+                } else if (this.isValidMove(x, y)) {
+                    this.move(x, y);
+                }
             }
         } else {
             this.select(x, y);
@@ -206,7 +236,10 @@ export default class ChessBoard extends BaseComponent {
 
     createChessPosition(x, y, classNames) {
         let pieceComponent = null;
-        let pieceData = this.getPieceData(x, y);
+        let pieceData = this.getPiece(x, y);
+        let validPos = this.getValidPos();
+        let move = this.getMove();
+        let pos = `${x},${y}`;
         if (pieceData) {
             let selected = this.getSelectedPiece();
             pieceComponent = this.createChessPiece(pieceData.type, pieceData.color);
@@ -217,10 +250,16 @@ export default class ChessBoard extends BaseComponent {
                 );
             }
         }
-        let validPos = this.getValidPos();
         if (validPos[`${x},${y}`]) {
             pieceComponent = (
                 <div className="piece-valid">{pieceComponent}</div>
+            )
+        }
+        if (pos === move.from || pos === move.to) {
+            pieceComponent = (
+                <div className="piece-moved">
+                    <div>{pieceComponent}</div>
+                </div>
             )
         }
         return (

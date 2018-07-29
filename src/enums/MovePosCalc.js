@@ -70,55 +70,23 @@ export default {
         return pos;
     },
     [PieceType.Knight]: function (target, pieces) {
-        let pos = {}, {x, y} = target;
-        if (!pieces[`${x + 1},${y}`]) {
-            if (x + 2 <= BoardSize.Width) {
-                if (y + 1 <= BoardSize.Height) {
-                    let p = {x: x + 2, y: y + 1};
-                    pos[`${p.x},${p.y}`] = p;
-                }
-                if (y - 1 > 0) {
-                    let p = {x: x + 2, y: y - 1};
-                    pos[`${p.x},${p.y}`] = p;
-                }
+        let pos = {};
+        let map = [
+            {pos: `${target.x + 2},${target.y + 1}`, roadblock: `${target.x + 1},${target.y}`},
+            {pos: `${target.x + 2},${target.y - 1}`, roadblock: `${target.x + 1},${target.y}`},
+            {pos: `${target.x - 2},${target.y + 1}`, roadblock: `${target.x - 1},${target.y}`},
+            {pos: `${target.x - 2},${target.y - 1}`, roadblock: `${target.x - 1},${target.y}`},
+            {pos: `${target.x + 1},${target.y + 2}`, roadblock: `${target.x},${target.y + 1}`},
+            {pos: `${target.x - 1},${target.y + 2}`, roadblock: `${target.x},${target.y + 1}`},
+            {pos: `${target.x + 1},${target.y - 2}`, roadblock: `${target.x},${target.y - 1}`},
+            {pos: `${target.x - 1},${target.y - 2}`, roadblock: `${target.x},${target.y - 1}`},
+        ];
+        map.forEach((p) => {
+            if (!pieces[p.roadblock] && (!pieces[p.pos] || pieces[p.pos].color !== target.color)) {
+                let [x, y] = p.pos.split(",").map(x => parseInt(x));
+                pos[p.pos] = {x: x, y: y};
             }
-        }
-        if (!pieces[`${x - 1},${y}`]) {
-            if (x - 2 > 0) {
-                if (y + 1 <= BoardSize.Height) {
-                    let p = {x: x - 2, y: y + 1};
-                    pos[`${p.x},${p.y}`] = p;
-                }
-                if (y - 1 > 0) {
-                    let p = {x: x - 2, y: y - 1};
-                    pos[`${p.x},${p.y}`] = p;
-                }
-            }
-        }
-        if (!pieces[`${x},${y + 1}`]) {
-            if (y + 2 <= BoardSize.Height) {
-                if (x + 1 <= BoardSize.Width) {
-                    let p = {x: x + 1, y: y + 2};
-                    pos[`${p.x},${p.y}`] = p;
-                }
-                if (x - 1 > 0) {
-                    let p = {x: x - 1, y: y + 2};
-                    pos[`${p.x},${p.y}`] = p;
-                }
-            }
-        }
-        if (!pieces[`${x},${y - 1}`]) {
-            if (y - 2 > 0) {
-                if (x + 1 <= BoardSize.Width) {
-                    let p = {x: x + 1, y: y - 2};
-                    pos[`${p.x},${p.y}`] = p;
-                }
-                if (x - 1 > 0) {
-                    let p = {x: x - 1, y: y - 2};
-                    pos[`${p.x},${p.y}`] = p;
-                }
-            }
-        }
+        });
         return pos;
     },
     [PieceType.Bishop]: function (target, pieces) {

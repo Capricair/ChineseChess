@@ -198,6 +198,7 @@ $brand-danger:  #d9534f;
           left: -$chess-size / 2;
           //border: 1px solid #ccc;
           box-sizing: border-box;
+          z-index: 1000;
 
           &.last-col{
             left: auto;
@@ -235,6 +236,7 @@ $brand-danger:  #d9534f;
           background-blend-mode: lighten;
           //border: 2px solid currentColor;
           //background-color: #fff;
+          cursor: pointer;
 
           &.chess-piece-red{
             color: darken($piece-red, 10%);
@@ -259,14 +261,15 @@ $brand-danger:  #d9534f;
             border-radius: 1000px;
             margin: auto;
             background-color: $brand-success;
-            z-index: 1000;
+            z-index: 2000;
             opacity: 0.7;
+            cursor: pointer;
           }
         }//.piece-valid end
 
         .piece-moved{
           &:before, &:after, >div:before, >div:after{
-            color: #00ADEF;
+            color: #F00;
             content: '';
             position: absolute;
             width: 20%;
