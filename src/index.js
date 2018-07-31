@@ -1,14 +1,14 @@
 import "./style/base.scss";
 import React from "react";
 import ReactDOM from "react-dom";
-import {BrowserRouter as Router, Route, Redirect} from "react-router-dom";
+import {BrowserRouter, Route, Redirect} from "react-router-dom";
 
 import ChineseChess from "./views/main/index";
 
 const Routes = (
-    <Router>
+    <BrowserRouter>
         <Route path="/" component={ChineseChess}/>
-    </Router>
+    </BrowserRouter>
 );
 
 ReactDOM.render(Routes, document.getElementById("app"));

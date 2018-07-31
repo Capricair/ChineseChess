@@ -3,7 +3,8 @@ import React from "react";
 import BaseComponent from "../base/index";
 import {PieceType, PieceColor, BoardSize, MovePosCalc} from "../../enums/index";
 import {Bishop, Cannon, Guard, King, Knight, Pawn, Rook} from "../piece";
-import _ from "lodash";
+import Voice from "../utils/Voice";
+import AudioPlayer from "../utils/AudioPlayer";
 
 let DiagonalPos = [
     {pos: ["4,1", "5,2", "4,8", "5,9"], value: <div className="diagonal diagonal-ac"/>},
@@ -19,7 +20,7 @@ let SerifPos = [
     {pos: ["1,3", "7,3", "2,7", "8,7"], value: <div className="serif serif-diagonal-bd"/>},
 ];
 
-let PieceComponentEnum = {
+let PieceComponent = {
     [PieceType.King]: King,
     [PieceType.Rook]: Rook,
     [PieceType.Knight]: Knight,
@@ -29,22 +30,24 @@ let PieceComponentEnum = {
     [PieceType.Pawn]: Pawn,
 };
 
-function SetPawnCommonProps(pawn) {
+let VoicePlayer = new AudioPlayer("#voice-player");
+
+function SetPawnProps(pawn) {
     let initY = pawn.y;
     Object.defineProperties(pawn, {
         initY: {
-            enumerable: true,
+            configurable: false,
             get: function () {
                 return initY;
-            }
+            },
         },
         isCrossRiver: {
-            enumerable: true,
+            configurable: false,
             get: function () {
                 if (initY === 4) {
-                    return pawn.y > 5;
+                    return this.y > 5;
                 } else {
-                    return pawn.y < 6;
+                    return this.y < 6;
                 }
             }
         }
@@ -64,6 +67,7 @@ export default class ChessBoard extends BaseComponent {
             selected: this.defaultSelected,
             validPos: this.defaultValidPos,
             move: this.defaultMove,
+            winner: null,
         };
     }
 
@@ -98,8 +102,8 @@ export default class ChessBoard extends BaseComponent {
                 type: p.type, color: colors[1],
             };
             if (p.type === PieceType.Pawn) {
-                SetPawnCommonProps(pieces[key]);
-                SetPawnCommonProps(pieces[`${x},${y}`]);
+                SetPawnProps(pieces[key]);
+                SetPawnProps(pieces[`${x},${y}`]);
             }
         });
         return pieces;
@@ -115,6 +119,10 @@ export default class ChessBoard extends BaseComponent {
 
     get defaultMove() {
         return {from: "", to: ""};
+    }
+
+    get gameover(){
+        return !!this.state.winner;
     }
 
     componentDidMount() {
@@ -145,6 +153,15 @@ export default class ChessBoard extends BaseComponent {
         return this.state.validPos;
     }
 
+    calcValidPos(piece){
+        let pos = {};
+        let func = MovePosCalc[piece.type];
+        if (typeof func === "function"){
+            pos = func(piece, this.getAllPiece());
+        }
+        return pos;
+    }
+
     getMove() {
         return this.state.move;
     }
@@ -152,15 +169,11 @@ export default class ChessBoard extends BaseComponent {
     select(x, y) {
         let piece = this.getPiece(x, y);
         if (piece && piece.color === this.getActiveColor()) {
-            let calc = MovePosCalc[piece.type];
-            let validPos = {};
-            if (typeof calc === "function") {
-                validPos = calc(piece, this.getAllPiece()) || validPos;
-            }
+            let validPos = this.calcValidPos(piece) || {};
             this.setState({
                 selected: piece,
                 validPos: validPos,
-                move: this.defaultMove,
+                // move: this.defaultMove,
             })
         }
     }
@@ -179,18 +192,27 @@ export default class ChessBoard extends BaseComponent {
     capture(selected, capturing) {
         let pieces = this.getAllPiece();
         if (capturing && capturing.color !== selected.color) {
-            delete pieces[`${capturing.x},${capturing.y}`];
+            return delete pieces[`${capturing.x},${capturing.y}`];
+            // this.playVoice(Voice.capture);
         }
+        return false;
     }
 
     move(x, y) {
-        let {pieces} = this.state;
+        let {pieces, active} = this.state;
         let piece = this.getPiece(x, y);
-        let selected = _.cloneDeep(this.getSelectedPiece());
+        let selected = this.getSelectedPiece();
         let from = `${selected.x},${selected.y}`;
         let to = `${x},${y}`;
+        let winner = null;
+        let voice = "";
         if (selected) {
-            this.capture(selected, piece);
+            if (this.capture(selected, piece)){
+                voice = Voice.capture;
+            }
+            if (piece && piece.type === PieceType.King){
+                winner = selected.color;
+            }
             delete pieces[from];
             selected.x = x;
             selected.y = y;
@@ -198,21 +220,57 @@ export default class ChessBoard extends BaseComponent {
             this.deselect(x, y);
             this.setState({
                 pieces: pieces,
-                move: {from: from, to: to}
+                move: {from: from, to: to},
+                active: active === PieceColor.Red ? PieceColor.Black : PieceColor.Red,
+                winner: winner,
+            }, ()=>{
+                if (this.check(x, y)){
+                    voice = Voice.check;
+                }
+                if ([PieceColor.Red, PieceColor.Black].includes(this.state.winner)){
+                    voice = [Voice.gameover, winner === PieceColor.Red ? Voice.redWin : Voice.blackWin];
+                }
+                if (voice){
+                    this.playVoice(voice);
+                }
             });
         }
     }
 
+    check(x, y){
+        let pieces = this.getAllPiece();
+        let piece = this.getPiece(x, y);
+        let pos = this.calcValidPos(piece);
+        for (let key of Object.keys(pos)){
+            if (pieces[key] && pieces[key].type === PieceType.King){
+                // this.playVoice(Voice.check);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    playVoice(sources){
+        if (VoicePlayer){
+            VoicePlayer.playList(Array.isArray(sources) ? sources : [sources]);
+        }
+    }
+
     positionClickHandler(x, y) {
+        if (this.gameover){
+            return false;
+        }
         let selected = this.getSelectedPiece();
         let piece = this.getPiece(x, y);
         if (selected) {
             if (piece && piece.color === selected.color) {
-                this.select(x, y);
-            } else {
-                if (selected.x === x && selected.y === y) {
+                if (selected.x === x && selected.y === y){
                     this.deselect(x, y);
-                } else if (this.isValidMove(x, y)) {
+                } else {
+                    this.select(x, y);
+                }
+            } else {
+                if (this.isValidMove(x, y)) {
                     this.move(x, y);
                 }
             }
@@ -231,7 +289,7 @@ export default class ChessBoard extends BaseComponent {
     }
 
     createChessPiece(type, color) {
-        return React.createElement(PieceComponentEnum[type], {color: color});
+        return React.createElement(PieceComponent[type], {color: color});
     }
 
     createChessPosition(x, y, classNames) {
