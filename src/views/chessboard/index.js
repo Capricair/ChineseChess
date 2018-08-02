@@ -69,6 +69,7 @@ export default class ChessBoard extends BaseComponent {
             validPos: this.defaultValidPos,
             move: this.defaultMove,
             winner: null,
+            log: [],
         };
     }
 
@@ -93,8 +94,7 @@ export default class ChessBoard extends BaseComponent {
             "7,4": {x: 7, y: 4, type: PieceType.Pawn, color: colors[0]},
             "9,4": {x: 9, y: 4, type: PieceType.Pawn, color: colors[0]},
         };
-        Object.keys(pieces).forEach((key) => {
-            let p = pieces[key];
+        Object.values(pieces).forEach((p) => {
             let x = p.x;
             let y = BoardSize.Height + 1 - p.y;
             pieces[`${x},${y}`] = {
@@ -103,7 +103,7 @@ export default class ChessBoard extends BaseComponent {
                 type: p.type, color: colors[1],
             };
             if (p.type === PieceType.Pawn) {
-                SetPawnProps(pieces[key]);
+                SetPawnProps(p);
                 SetPawnProps(pieces[`${x},${y}`]);
             }
         });
@@ -238,11 +238,12 @@ export default class ChessBoard extends BaseComponent {
 
     check(x, y){
         let pieces = this.getAllPiece();
-        let piece = this.getPiece(x, y);
-        let pos = this.calcValidPos(piece);
-        for (let key of Object.keys(pos)){
-            if (pieces[key] && pieces[key].type === PieceType.King){
-                return true;
+        for (let piece of Object.values(pieces)){
+            let pos = this.calcValidPos(piece);
+            for (let key of Object.keys(pos)){
+                if (pieces[key] && pieces[key].type === PieceType.King){
+                    return true;
+                }
             }
         }
         return false;

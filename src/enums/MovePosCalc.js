@@ -7,7 +7,7 @@ let LoopAction = {
 };
 
 let BishopPosList = [
-    ["3,1", "7,1", "1,2", "5,2", "9,2", "3,5", "7,5"],
+    ["3,1", "7,1", "1,3", "5,3", "9,3", "3,5", "7,5"],
     ["3,10", "7,10", "1,8", "5,8", "9,8", "3,6", "7,6"],
 ];
 
@@ -68,7 +68,7 @@ function ComparePiece(piece1, piece2) {
 }
 
 function GetKings(pieces) {
-    return Object.entries(pieces).filter(x => x[1].type === PieceType.King).map(x => x[1]);
+    return Object.values(pieces).filter(x => x.type === PieceType.King);
 }
 
 export default {
