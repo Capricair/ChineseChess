@@ -3,8 +3,8 @@ import React from "react";
 import BaseComponent from "../base/index";
 import {PieceType, PieceColor, BoardSize, MovePosCalc} from "../../enums/index";
 import {Bishop, Cannon, Guard, King, Knight, Pawn, Rook} from "../piece";
-import Voice from "../utils/Voice";
-import AudioPlayer from "../utils/AudioPlayer";
+import Voice from "../../utils/Voice";
+import AudioPlayer from "../../utils/AudioPlayer";
 
 let DiagonalPos = [
     {pos: ["4,1", "5,2", "4,8", "5,9"], value: <div className="diagonal diagonal-ac"/>},
@@ -57,6 +57,7 @@ function SetPawnProps(pawn) {
 export default class ChessBoard extends BaseComponent {
     static defaultProps = {
         perspective: PieceColor.Red,
+        onMove: ()=>{},
     };
 
     constructor(props) {
@@ -173,7 +174,6 @@ export default class ChessBoard extends BaseComponent {
             this.setState({
                 selected: piece,
                 validPos: validPos,
-                // move: this.defaultMove,
             })
         }
     }
@@ -193,7 +193,6 @@ export default class ChessBoard extends BaseComponent {
         let pieces = this.getAllPiece();
         if (capturing && capturing.color !== selected.color) {
             return delete pieces[`${capturing.x},${capturing.y}`];
-            // this.playVoice(Voice.capture);
         }
         return false;
     }
@@ -243,7 +242,6 @@ export default class ChessBoard extends BaseComponent {
         let pos = this.calcValidPos(piece);
         for (let key of Object.keys(pos)){
             if (pieces[key] && pieces[key].type === PieceType.King){
-                // this.playVoice(Voice.check);
                 return true;
             }
         }

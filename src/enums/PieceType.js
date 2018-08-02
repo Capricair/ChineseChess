@@ -1,9 +1,9 @@
 export default {
-    King: 0,
-    Rook: 1,
-    Knight: 2,
-    Bishop: 3,
-    Guard: 4,
-    Cannon: 5,
-    Pawn: 6,
+    King: 1,
+    Rook: 2,
+    Knight: 3,
+    Bishop: 4,
+    Guard: 5,
+    Cannon: 6,
+    Pawn: 7,
 }

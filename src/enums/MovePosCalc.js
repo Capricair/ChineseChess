@@ -21,7 +21,7 @@ let KingPosList = [
     ["4,10", "4,9", "4,8", "5,10", "5,9", "5,8", "6,10", "6,9", "6,8"],
 ];
 
-function setRookPos(posList, target, pieces, x, y) {
+function SetRookPos(posList, target, pieces, x, y) {
     let piece = pieces[`${x},${y}`];
     if (piece) {
         if (piece.color !== target.color) {
@@ -33,7 +33,7 @@ function setRookPos(posList, target, pieces, x, y) {
     }
 }
 
-function setCannonPos(posList, target, pieces, x, y, vars) {
+function SetCannonPos(posList, target, pieces, x, y, vars) {
     let piece = pieces[`${x},${y}`];
     if (vars.hasMetPiece && piece && piece.color !== target.color) {
         posList[`${x},${y}`] = {x: x, y: y};
@@ -48,23 +48,46 @@ function setCannonPos(posList, target, pieces, x, y, vars) {
     }
 }
 
+function IsKingMet(pieces) {
+    let [king1, king2] = GetKings(pieces);
+    if (king1 && king2 && king1.x === king2.x) {
+        let start = Math.min(king1.y + 1, king2.y + 1);
+        let end = Math.max(king1.y - 1, king2.y - 1);
+        for (let i = start; i < end; i++) {
+            if (pieces[`${king1.x},${i}`]) {
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
+function ComparePiece(piece1, piece2) {
+    return piece1.type === piece2.type && piece1.x === piece2.x && piece1.y === piece2.y;
+}
+
+function GetKings(pieces) {
+    return Object.entries(pieces).filter(x => x[1].type === PieceType.King).map(x => x[1]);
+}
+
 export default {
     [PieceType.Rook]: function (target, pieces) {
         let pos = {};
         for (let x = target.x - 1; x > 0; x--) {
-            let action = setRookPos(pos, target, pieces, x, target.y);
+            let action = SetRookPos(pos, target, pieces, x, target.y);
             if (action === LoopAction.Break) break;
         }
         for (let x = target.x + 1; x <= BoardSize.Width; x++) {
-            let action = setRookPos(pos, target, pieces, x, target.y);
+            let action = SetRookPos(pos, target, pieces, x, target.y);
             if (action === LoopAction.Break) break;
         }
         for (let y = target.y - 1; y > 0; y--) {
-            let action = setRookPos(pos, target, pieces, target.x, y);
+            let action = SetRookPos(pos, target, pieces, target.x, y);
             if (action === LoopAction.Break) break;
         }
         for (let y = target.y + 1; y <= BoardSize.Height; y++) {
-            let action = setRookPos(pos, target, pieces, target.x, y);
+            let action = SetRookPos(pos, target, pieces, target.x, y);
             if (action === LoopAction.Break) break;
         }
         return pos;
@@ -138,34 +161,38 @@ export default {
                 pos[p.pos] = {x: x, y: y};
             }
         });
+        if (IsKingMet(pieces)) {
+            let {x, y} = GetKings(pieces).find(x => !ComparePiece(target, x));
+            pos[`${x},${y}`] = {x: x, y: y};
+        }
         return pos;
     },
     [PieceType.Cannon]: function (target, pieces) {
         let pos = {}, vars = {hasMetPiece: false};
 
         for (let x = target.x - 1; x > 0; x--) {
-            let action = setCannonPos(pos, target, pieces, x, target.y, vars);
+            let action = SetCannonPos(pos, target, pieces, x, target.y, vars);
             if (action === LoopAction.Continue) continue;
             if (action === LoopAction.Break) break;
         }
         vars.hasMetPiece = false;
 
         for (let x = target.x + 1; x <= BoardSize.Width; x++) {
-            let action = setCannonPos(pos, target, pieces, x, target.y, vars);
+            let action = SetCannonPos(pos, target, pieces, x, target.y, vars);
             if (action === LoopAction.Continue) continue;
             if (action === LoopAction.Break) break;
         }
         vars.hasMetPiece = false;
 
         for (let y = target.y - 1; y > 0; y--) {
-            let action = setCannonPos(pos, target, pieces, target.x, y, vars);
+            let action = SetCannonPos(pos, target, pieces, target.x, y, vars);
             if (action === LoopAction.Continue) continue;
             if (action === LoopAction.Break) break;
         }
         vars.hasMetPiece = false;
 
         for (let y = target.y + 1; y <= BoardSize.Height; y++) {
-            let action = setCannonPos(pos, target, pieces, target.x, y, vars);
+            let action = SetCannonPos(pos, target, pieces, target.x, y, vars);
             if (action === LoopAction.Continue) continue;
             if (action === LoopAction.Break) break;
         }
