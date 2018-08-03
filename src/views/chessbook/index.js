@@ -29,23 +29,24 @@ export default class ChessBook extends BaseComponent {
 
     getMoveName(item, isOpposite) {
         let {from, to} = item;
+        let fromX = from.x, fromY = from.y, toX = to.x, toY = to.y;
         let name = "";
 
         if (isOpposite) {
-            from.x = BoardSize.Width + 1 - from.x;
-            from.y = BoardSize.Height + 1 - from.y;
-            to.x = BoardSize.Width + 1 - to.x;
-            to.y = BoardSize.Height + 1 - to.y;
+            fromX = BoardSize.Width + 1 - fromX;
+            fromY = BoardSize.Height + 1 - fromY;
+            toX = BoardSize.Width + 1 - toX;
+            toY = BoardSize.Height + 1 - toY;
         }
 
-        if (from.x === to.x && from.y > to.y) {
-            name = `进${ChineseNumeral[from.y - to.y]}`;
+        if (fromY > toY) {
+            name = `进${ChineseNumeral[fromX === toX ? fromY - toY : toX]}`;
         }
-        if (from.x === to.x && from.y < to.y) {
-            name = `退${ChineseNumeral[to.y - from.y]}`;
+        if (fromY < toY) {
+            name = `退${ChineseNumeral[fromX === toX ? toY - fromY : toX]}`;
         }
-        if (from.y === to.y && from.x !== to.x) {
-            name = `平${ChineseNumeral[to.x]}`;
+        if (fromY === toY && fromX !== toX) {
+            name = `平${ChineseNumeral[toX]}`;
         }
 
         return name;
@@ -55,14 +56,19 @@ export default class ChessBook extends BaseComponent {
         if (!item) return null;
         let isOpposite = this.props.perspective !== item.color;
         let pieceName = PieceTypeZH[item.type];
-        let posName = isOpposite ? ChineseNumeral[BoardSize.Width + 1 - item.x] : ChineseNumeral[item.from.x];
+        let posName = isOpposite ? ChineseNumeral[BoardSize.Width + 1 - item.from.x] : ChineseNumeral[item.from.x];
         let moveName = this.getMoveName(item, isOpposite);
         return `${pieceName}${posName}${moveName}`;
     }
 
+    componentDidUpdate(){
+        let container = this.refs["chess-book"];
+        container.scrollTop = container.scrollHeight - container.clientHeight;
+    }
+
     render() {
         return (
-            <div className="chess-book">
+            <div ref="chess-book" className="chess-book">
                 {this.getBookList()}
             </div>
         )

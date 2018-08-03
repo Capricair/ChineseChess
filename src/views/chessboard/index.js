@@ -4,6 +4,7 @@ import {PieceType, PieceColor, BoardSize, MovePosCalc} from "../../enums/index";
 import {Bishop, Cannon, Guard, King, Knight, Pawn, Rook} from "../piece";
 import Voice from "../../utils/Voice";
 import AudioPlayer from "../../utils/AudioPlayer";
+import ChineseNumeral from "../../enums/ChineseNumeral";
 
 let DiagonalPos = [
     {pos: ["4,1", "5,2", "4,8", "5,9"], value: <div className="diagonal diagonal-ac"/>},
@@ -299,6 +300,7 @@ export default class ChessBoard extends BaseComponent {
         let validPos = this.getValidPos();
         let move = this.getMove();
         let pos = `${x},${y}`;
+        let fileNumber = null;
         if (pieceData) {
             let selected = this.getSelectedPiece();
             pieceComponent = this.createChessPiece(pieceData.type, pieceData.color);
@@ -321,6 +323,12 @@ export default class ChessBoard extends BaseComponent {
                 </div>
             )
         }
+        if (y === 1){
+            fileNumber = <div className="file-number opposite">{BoardSize.Width + 1 - x}</div>
+        }
+        if (y === BoardSize.Height){
+            fileNumber = <div className="file-number">{ChineseNumeral[x]}</div>
+        }
         return (
             <div key={`${x}-${y}`}
                  data-pos={`${x},${y}`}
@@ -329,6 +337,7 @@ export default class ChessBoard extends BaseComponent {
                      this.positionClickHandler(x, y)
                  }}>
                 {pieceComponent}
+                {fileNumber}
             </div>
         )
     }

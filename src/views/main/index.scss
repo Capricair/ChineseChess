@@ -216,6 +216,20 @@ $brand-danger:  #d9534f;
             right: -$chess-size / 2;
             bottom: -$chess-size / 2;
           }
+
+          .file-number{
+            position: absolute;
+            bottom: -40%;
+            left: 0;
+            right: 0;
+            text-align: center;
+
+            &.opposite{
+              top: -40%;
+              bottom: auto;
+            }
+          }
+
         } //.chess-pos end
 
         .chess-piece{
@@ -306,9 +320,12 @@ $brand-danger:  #d9534f;
 
       .chess-book{
         position: absolute;
-        right: -134px;
+        right: -150px;
         top: 0;
-        width: 104px;
+        height: 100%;
+        overflow: auto;
+        box-sizing: border-box;
+        //padding-right: 10px;
 
         >ol{
           margin-top: 0;
@@ -321,6 +338,10 @@ $brand-danger:  #d9534f;
 
         .player-black{
           color: $piece-black;
+        }
+
+        &::-webkit-scrollbar{
+          display: none;
         }
       }//.chess-book end
     } //.wrapper end
