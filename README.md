@@ -1,5 +1,5 @@
 # ChineseChess
-React版中国象棋，用于研究tensorflow.js   
+React版中国象棋，用于研究 TensorFlow.js   
 
 # 运行环境
 nodejs版本：8.10.0   
