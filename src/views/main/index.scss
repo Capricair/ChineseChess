@@ -234,8 +234,6 @@ $brand-danger:  #d9534f;
           background-position: center center;
           background-size: contain;
           background-blend-mode: lighten;
-          //border: 2px solid currentColor;
-          //background-color: #fff;
           cursor: pointer;
 
           &.chess-piece-red{
@@ -305,6 +303,26 @@ $brand-danger:  #d9534f;
           }
         }//.piece-moved end
       } //.chess-board end
+
+      .chess-book{
+        position: absolute;
+        right: -134px;
+        top: 0;
+        width: 104px;
+
+        >ol{
+          margin-top: 0;
+          margin-bottom: 0;
+        }
+
+        .player-red{
+          color: $piece-red;
+        }
+
+        .player-black{
+          color: $piece-black;
+        }
+      }//.chess-book end
     } //.wrapper end
   } //.container end
 }

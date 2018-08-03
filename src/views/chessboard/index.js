@@ -1,4 +1,3 @@
-import "./index.scss";
 import React from "react";
 import BaseComponent from "../base/index";
 import {PieceType, PieceColor, BoardSize, MovePosCalc} from "../../enums/index";
@@ -69,7 +68,6 @@ export default class ChessBoard extends BaseComponent {
             validPos: this.defaultValidPos,
             move: this.defaultMove,
             winner: null,
-            log: [],
         };
     }
 
@@ -163,6 +161,10 @@ export default class ChessBoard extends BaseComponent {
         return pos;
     }
 
+    isValidMove(x, y) {
+        return this.state.validPos[`${x},${y}`];
+    }
+
     getMove() {
         return this.state.move;
     }
@@ -185,10 +187,6 @@ export default class ChessBoard extends BaseComponent {
         })
     }
 
-    isValidMove(x, y) {
-        return this.state.validPos[`${x},${y}`];
-    }
-
     capture(selected, capturing) {
         let pieces = this.getAllPiece();
         if (capturing && capturing.color !== selected.color) {
@@ -198,7 +196,8 @@ export default class ChessBoard extends BaseComponent {
     }
 
     move(x, y) {
-        let {pieces, active} = this.state;
+        let active = this.getActiveColor();
+        let pieces = this.getAllPiece();
         let piece = this.getPiece(x, y);
         let selected = this.getSelectedPiece();
         let from = `${selected.x},${selected.y}`;
@@ -231,6 +230,9 @@ export default class ChessBoard extends BaseComponent {
                 }
                 if (voice){
                     this.playVoice(voice);
+                }
+                if (typeof this.props.onMove === "function"){
+                    this.props.onMove(selected, from, to);
                 }
             });
         }
@@ -291,7 +293,7 @@ export default class ChessBoard extends BaseComponent {
         return React.createElement(PieceComponent[type], {color: color});
     }
 
-    createChessPosition(x, y, classNames) {
+    createChessPosition(x, y, className) {
         let pieceComponent = null;
         let pieceData = this.getPiece(x, y);
         let validPos = this.getValidPos();
@@ -320,9 +322,9 @@ export default class ChessBoard extends BaseComponent {
             )
         }
         return (
-            <div key={`${x}-${y}-${classNames}`}
+            <div key={`${x}-${y}`}
                  data-pos={`${x},${y}`}
-                 className={classNames}
+                 className={className}
                  onClick={() => {
                      this.positionClickHandler(x, y)
                  }}>
