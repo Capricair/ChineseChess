@@ -1,8 +1,8 @@
 import "./index.scss";
 import React from "react";
 import BaseComponent from "../base/index";
-import Chessboard from "../chessboard/index";
-import ChessBook from "../chessbook/index";
+import Chessboard from "./chessboard/index";
+import ChessBook from "./chessbook/index";
 
 export default class ChineseChess extends BaseComponent {
     constructor(props) {

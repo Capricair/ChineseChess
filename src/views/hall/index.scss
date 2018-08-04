@@ -1,0 +1,32 @@
+.game-hall{
+  padding: 20px;
+
+  .list-room{
+    >li{
+      margin: 10px;
+      text-align: center;
+      display: inline-block;
+      vertical-align: middle;
+
+      >div{
+        line-height: 30px;
+        vertical-align: middle;
+      }
+
+      >.icon-user{
+        color: #ddd;
+        font-size: 30px;
+        cursor: pointer;
+      }
+
+      .list-table-image{
+        width: 100px;
+        height: 100px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        background: url("../../../static/images/chessboard.jpg") no-repeat center;
+        background-size: contain;
+      }
+    }
+  }
+}

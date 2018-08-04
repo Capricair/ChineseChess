@@ -1,10 +1,10 @@
 import React from "react";
-import BaseComponent from "../base/index";
-import {PieceType, PieceColor, BoardSize, MovePosCalc} from "../../enums/index";
-import {Bishop, Cannon, Guard, King, Knight, Pawn, Rook} from "../piece";
-import Voice from "../../utils/Voice";
-import AudioPlayer from "../../utils/AudioPlayer";
-import ChineseNumeral from "../../enums/ChineseNumeral";
+import BaseComponent from "../../base/index";
+import {PieceType, PieceColor, BoardSize, MovePosCalc} from "../../../enums/index";
+import {Bishop, Cannon, Guard, King, Knight, Pawn, Rook} from "../piece/index";
+import Voice from "../../../utils/Voice";
+import AudioPlayer from "../../../utils/AudioPlayer";
+import ChineseNumeral from "../../../enums/ChineseNumeral";
 
 let DiagonalPos = [
     {pos: ["4,1", "5,2", "4,8", "5,9"], value: <div className="diagonal diagonal-ac"/>},

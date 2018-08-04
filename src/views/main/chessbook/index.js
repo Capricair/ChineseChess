@@ -1,6 +1,6 @@
 import React from "react";
-import BaseComponent from "../base/index";
-import {PieceColor, PieceTypeZH, ChineseNumeral, BoardSize} from "../../enums/";
+import BaseComponent from "../../base/index";
+import {PieceColor, PieceTypeZH, ChineseNumeral, BoardSize} from "../../../enums/index";
 
 export default class ChessBook extends BaseComponent {
     static defaultProps = {

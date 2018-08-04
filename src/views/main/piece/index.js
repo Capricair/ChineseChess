@@ -1,6 +1,6 @@
 import React from "react";
-import BaseComponent from "../base/index";
-import {PieceType, PieceTypeName, PieceColor} from "../../enums/index";
+import BaseComponent from "../../base/index";
+import {PieceType, PieceTypeName, PieceColor} from "../../../enums/index";
 
 let DefaultClass = "chess-piece";
 
@@ -10,13 +10,13 @@ let ColorClassEnum = {
 };
 
 let PieceImageEnum = {
-    [PieceType.King]: require("../../../static/images/king.png"),
-    [PieceType.Rook]: require("../../../static/images/rook.png"),
-    [PieceType.Knight]: require("../../../static/images/knight.png"),
-    [PieceType.Bishop]: require("../../../static/images/bishop.png"),
-    [PieceType.Guard]: require("../../../static/images/guard.png"),
-    [PieceType.Cannon]: require("../../../static/images/cannon.png"),
-    [PieceType.Pawn]: require("../../../static/images/pawn.png"),
+    [PieceType.King]: require("../../../../static/images/king.png"),
+    [PieceType.Rook]: require("../../../../static/images/rook.png"),
+    [PieceType.Knight]: require("../../../../static/images/knight.png"),
+    [PieceType.Bishop]: require("../../../../static/images/bishop.png"),
+    [PieceType.Guard]: require("../../../../static/images/guard.png"),
+    [PieceType.Cannon]: require("../../../../static/images/cannon.png"),
+    [PieceType.Pawn]: require("../../../../static/images/pawn.png"),
 };
 
 class ChessPiece extends BaseComponent{

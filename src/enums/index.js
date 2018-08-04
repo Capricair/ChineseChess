@@ -5,6 +5,8 @@ import BoardSize from "./BoardSize";
 import MovePosCalc from "./MovePosCalc";
 import PieceTypeZH from "./PieceTypeZH";
 import ChineseNumeral from "./ChineseNumeral";
+import Views from "./Views";
+import PlayerStatus from "./PlayerStatus";
 
 export {
     BoardSize,
@@ -14,4 +16,6 @@ export {
     MovePosCalc,
     PieceTypeZH,
     ChineseNumeral,
+    Views,
+    PlayerStatus,
 };
