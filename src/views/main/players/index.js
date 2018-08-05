@@ -41,7 +41,7 @@ export default class Players extends BaseComponent {
                 </div>
                 <div className="player">
                     <div className="avatar">{self.user}</div>
-                    {!gameStart && self.status !== PlayerStatus.Ready ? this.readyButton : "已准备"}
+                    {!gameStart ? self.status !== PlayerStatus.Ready ? this.readyButton : "已准备" : ""}
                     {gameStart && active === self.color ? "走棋" : ""}
                 </div>
             </div>

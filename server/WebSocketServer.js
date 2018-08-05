@@ -85,6 +85,16 @@ const actions = {
             color: data.color,
         });
     },
+    movePiece: (data, client) => {
+        for (let x of server.clients){
+            if (x.uuid === data.adversary.uuid){
+                server.sendTo(x, {
+                    ...data,
+                    receiver: data.adversary.uuid,
+                });
+            }
+        }
+    },
     close: (data, client) => {
         console.log(`${cache.user[data.uuid].user}(${data.uuid})退出游戏`);
         delete cache.user[data.uuid];

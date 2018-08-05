@@ -4,7 +4,7 @@ import BaseComponent from "../base/index";
 import Players from "./players/index";
 import Chessboard from "./chessboard/index";
 import ChessBook from "./chessbook/index";
-import {PieceColor} from "../../enums/index";
+import {PieceColor, PlayerStatus, BoardSize} from "../../enums/index";
 import {StoreKey, Global} from "../../utils/index";
 import {Configurable} from "../../decorators/index";
 
@@ -19,7 +19,7 @@ export default class ChineseChess extends BaseComponent {
             roomId: parseInt(sessionStorage.getItem(StoreKey.roomId)),
             adversary: {},
             self: {},
-            perspective: sessionStorage.getItem(StoreKey.color),
+            perspective: parseInt(sessionStorage.getItem(StoreKey.color)),
             gameStart: false,
             active: PieceColor.Red,
             log: [],
@@ -57,26 +57,39 @@ export default class ChineseChess extends BaseComponent {
             this.setState({
                 adversary: adversary,
                 self: self,
+                gameStart: this.isAllReady(adversary, self),
             })
         },
         playerReady: (data) => {
-            this.setPlayer(data.player.uuid, data.player);
+            this.setPlayer(data.player.uuid, data.player, () => {
+                let {adversary, self} = this.state;
+                if (this.isAllReady(adversary, self)) {
+                    this.setState({
+                        gameStart: true,
+                    });
+                }
+            });
         },
         leaveRoom: (data) => {
             this.setPlayer(data.uuid, this.defaultPlayer);
         },
+        movePiece: (data) => {
+            if (data.receiver === this.state.uuid){
+                let {from, to} = data;
+                from.y = BoardSize.Height + 1 - from.y;
+                to.y = BoardSize.Height + 1 - to.y;
+                this.refs[`chessboard`].movePiece(from, to);
+            }
+        },
     };
 
-    setPlayer(uuid, player){
-        if (uuid === this.state.uuid) {
-            this.setState({
-                self: player,
-            })
-        } else {
-            this.setState({
-                adversary: player,
-            })
-        }
+    isAllReady(player1, player2) {
+        return player1.status === PlayerStatus.Ready && player2.status === PlayerStatus.Ready;
+    }
+
+    setPlayer(uuid, player, callback) {
+        let data = uuid === this.state.uuid ? {self: player} : {adversary: player};
+        this.setState(data, callback);
     }
 
     initPlayersData() {
@@ -90,9 +103,19 @@ export default class ChineseChess extends BaseComponent {
         }
     }
 
-    onMoveHandler(piece, from, to, active) {
+    onMoveHandler(piece, from, to, active, fromSocket) {
+        this.movePieceAction(from, to, fromSocket);
         this.setActive(active);
         this.record(piece, from, to);
+    }
+
+    movePieceAction(from, to, fromSocket) {
+        if (!fromSocket){
+            let {adversary, self} = this.state;
+            let [fromX, fromY] = (from || "").split(",").map(x => parseInt(x));
+            let [toX, toY] = (to || "").split(",").map(x => parseInt(x));
+            Global.socket.movePiece(adversary, self, {x: fromX, y: fromY}, {x: toX, y: toY});
+        }
     }
 
     setActive(active) {
@@ -128,10 +151,13 @@ export default class ChineseChess extends BaseComponent {
                             active={active}
                         />
                         <Chessboard
+                            ref="chessboard"
                             ready={gameStart}
                             perspective={perspective}
-                            onMove={(piece, from, to, active) => {
-                                this.onMoveHandler(piece, from, to, active)
+                            adversary={adversary}
+                            self={self}
+                            onMove={(piece, from, to, active, fromSocket) => {
+                                this.onMoveHandler(piece, from, to, active, fromSocket)
                             }}
                         />
                         <ChessBook

@@ -76,7 +76,9 @@ export default class Hall extends BaseComponent {
     removePlayer(data){
         let {rooms} = this.state;
         let room = rooms.find(x => [x.red.uuid, x.black.uuid].includes(data.uuid));
-        data.color === PieceColor.Red ? room.red = this.defaultPlayer : room.black = this.defaultPlayer;
+        if (room){
+            data.color === PieceColor.Red ? room.red = this.defaultPlayer : room.black = this.defaultPlayer;
+        }
         this.setState({
             rooms: rooms
         })

@@ -78,6 +78,16 @@ export default function WebSocketClient(options) {
         })
     };
 
+    that.movePiece = function (adversary, self, from, to) {
+        that.send({
+            action: "movePiece",
+            adversary: adversary,
+            self: self,
+            from: from,
+            to: to,
+        })
+    };
+
     that.onerror = conf.onerror;
 
     socket.onopen = function (e) {

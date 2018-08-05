@@ -1,10 +1,8 @@
 import React from "react";
 import BaseComponent from "../../base/index";
-import {PieceType, PieceColor, BoardSize, MovePosCalc} from "../../../enums/index";
 import {Bishop, Cannon, Guard, King, Knight, Pawn, Rook} from "../piece/index";
-import Voice from "../../../utils/Voice";
-import AudioPlayer from "../../../utils/AudioPlayer";
-import ChineseNumeral from "../../../enums/ChineseNumeral";
+import {PieceType, PieceColor, BoardSize, MovePosCalc, ChineseNumeral} from "../../../enums/index";
+import {AudioPlayer, Voice} from "../../../utils/index";
 
 let DiagonalPos = [
     {pos: ["4,1", "5,2", "4,8", "5,9"], value: <div className="diagonal diagonal-ac"/>},
@@ -57,20 +55,30 @@ function SetPawnProps(pawn) {
 export default class ChessBoard extends BaseComponent {
     static defaultProps = {
         perspective: PieceColor.Red,
+        adversary: {},
+        self: {},
         ready: true,
-        onMove: ()=>{},
+        onMove: () => {},
     };
 
     constructor(props) {
         super(props);
         this.state = {
-            pieces: props.ready ? this.defaultPieces : [],
+            pieces: props.ready ? this.defaultPieces : {},
             active: PieceColor.Red,
             selected: this.defaultSelected,
             validPos: this.defaultValidPos,
             move: this.defaultMove,
             winner: null,
         };
+    }
+
+    movePiece(from, to){
+        let selected = this.getPiece(from.x, from.y);
+        this.move(to.x, to.y, {
+            selected: selected,
+            fromSocket: true,
+        });
     }
 
     get defaultPieces() {
@@ -122,8 +130,22 @@ export default class ChessBoard extends BaseComponent {
         return {from: "", to: ""};
     }
 
-    get gameover(){
+    get gameover() {
         return !!this.state.winner;
+    }
+
+    get isMyTurn() {
+        return this.getActiveColor() === this.props.perspective;
+    }
+
+    componentWillReceiveProps(props) {
+        if (props.ready) {
+            let {pieces} = this.state;
+            this.setState({
+                ready: props.ready,
+                pieces: Object.keys(pieces).length > 0 ? pieces : this.defaultPieces,
+            })
+        }
     }
 
     componentDidMount() {
@@ -154,10 +176,10 @@ export default class ChessBoard extends BaseComponent {
         return this.state.validPos;
     }
 
-    calcValidPos(piece){
+    calcValidPos(piece) {
         let pos = {};
         let func = MovePosCalc[piece.type];
-        if (typeof func === "function"){
+        if (typeof func === "function") {
             pos = func(piece, this.getAllPiece());
         }
         return pos;
@@ -197,20 +219,25 @@ export default class ChessBoard extends BaseComponent {
         return false;
     }
 
-    move(x, y) {
+    move(x, y, options) {
+        let defaults = {
+            selected: null,
+            fromSocket: false,
+        };
+        let conf = Object.assign({}, defaults, options);
         let active = this.getActiveColor();
         let pieces = this.getAllPiece();
         let piece = this.getPiece(x, y);
-        let selected = this.getSelectedPiece();
+        let selected = conf.selected || this.getSelectedPiece();
         let from = `${selected.x},${selected.y}`;
         let to = `${x},${y}`;
         let winner = null;
         let voice = "";
         if (selected) {
-            if (this.capture(selected, piece)){
+            if (this.capture(selected, piece)) {
                 voice = Voice.capture;
             }
-            if (piece && piece.type === PieceType.King){
+            if (piece && piece.type === PieceType.King) {
                 winner = selected.color;
             }
             delete pieces[from];
@@ -223,29 +250,29 @@ export default class ChessBoard extends BaseComponent {
                 move: {from: from, to: to},
                 active: active === PieceColor.Red ? PieceColor.Black : PieceColor.Red,
                 winner: winner,
-            }, ()=>{
-                if (this.check(x, y)){
+            }, () => {
+                if (this.check(x, y)) {
                     voice = Voice.check;
                 }
-                if ([PieceColor.Red, PieceColor.Black].includes(this.state.winner)){
+                if ([PieceColor.Red, PieceColor.Black].includes(this.state.winner)) {
                     voice = [Voice.gameover, winner === PieceColor.Red ? Voice.redWin : Voice.blackWin];
                 }
-                if (voice){
+                if (voice) {
                     this.playVoice(voice);
                 }
-                if (typeof this.props.onMove === "function"){
-                    this.props.onMove(selected, from, to, this.state.active);
+                if (typeof this.props.onMove === "function") {
+                    this.props.onMove(selected, from, to, this.state.active, conf.fromSocket);
                 }
             });
         }
     }
 
-    check(x, y){
+    check(x, y) {
         let pieces = this.getAllPiece();
-        for (let piece of Object.values(pieces)){
+        for (let piece of Object.values(pieces)) {
             let pos = this.calcValidPos(piece);
-            for (let key of Object.keys(pos)){
-                if (pieces[key] && pieces[key].type === PieceType.King){
+            for (let key of Object.keys(pos)) {
+                if (pieces[key] && pieces[key].type === PieceType.King) {
                     return true;
                 }
             }
@@ -253,21 +280,21 @@ export default class ChessBoard extends BaseComponent {
         return false;
     }
 
-    playVoice(sources){
-        if (VoicePlayer){
+    playVoice(sources) {
+        if (VoicePlayer) {
             VoicePlayer.playList(Array.isArray(sources) ? sources : [sources]);
         }
     }
 
     positionClickHandler(x, y) {
-        if (this.gameover){
+        if (this.gameover || !this.isMyTurn) {
             return false;
         }
         let selected = this.getSelectedPiece();
         let piece = this.getPiece(x, y);
         if (selected) {
             if (piece && piece.color === selected.color) {
-                if (selected.x === x && selected.y === y){
+                if (selected.x === x && selected.y === y) {
                     this.deselect(x, y);
                 } else {
                     this.select(x, y);
@@ -324,10 +351,10 @@ export default class ChessBoard extends BaseComponent {
                 </div>
             )
         }
-        if (y === 1){
+        if (y === 1) {
             fileNumber = <div className="file-number opposite">{BoardSize.Width + 1 - x}</div>
         }
-        if (y === BoardSize.Height){
+        if (y === BoardSize.Height) {
             fileNumber = <div className="file-number">{ChineseNumeral[x]}</div>
         }
         return (
