@@ -14,6 +14,8 @@ export default class ChineseChess extends BaseComponent {
         super.checkLogin();
         this.state = {
             @Configurable(false)
+            uuid: sessionStorage.getItem(StoreKey.uuid),
+            @Configurable(false)
             roomId: parseInt(sessionStorage.getItem(StoreKey.roomId)),
             adversary: {},
             self: {},
@@ -28,7 +30,7 @@ export default class ChineseChess extends BaseComponent {
                 action.call(this, data);
             }
         };
-        this.setPlayers();
+        this.initPlayersData();
     }
 
     componentWillUnmount() {
@@ -57,14 +59,27 @@ export default class ChineseChess extends BaseComponent {
                 self: self,
             })
         },
-        playerReady: (data)=>{
-            this.setState({
-                self: data.player,
-            })
-        }
+        playerReady: (data) => {
+            this.setPlayer(data.player.uuid, data.player);
+        },
+        leaveRoom: (data) => {
+            this.setPlayer(data.uuid, this.defaultPlayer);
+        },
     };
 
-    setPlayers() {
+    setPlayer(uuid, player){
+        if (uuid === this.state.uuid) {
+            this.setState({
+                self: player,
+            })
+        } else {
+            this.setState({
+                adversary: player,
+            })
+        }
+    }
+
+    initPlayersData() {
         let roomId = parseInt(sessionStorage.getItem(StoreKey.roomId));
         if (Global.socket.readyState === WebSocket.OPEN) {
             Global.socket.getPlayersByRoomId(roomId);

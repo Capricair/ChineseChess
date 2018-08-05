@@ -23,6 +23,7 @@ const actions = {
         };
     },
     enterRoom: (data, client) => {
+        console.log(`${data.user}(${data.uuid})进入${data.roomId}号房间`);
         cache.room[data.uuid] = {
             uuid: data.uuid,
             user: data.user,
@@ -38,7 +39,6 @@ const actions = {
             color: data.color,
             status: data.status,
         });
-        console.log(`${data.user}(${data.uuid})进入${data.roomId}号房间`);
     },
     getAllRooms: (data, client) => {
         server.sendTo(client, {
@@ -75,6 +75,7 @@ const actions = {
         }
     },
     leaveRoom: (data, client) => {
+        console.log(`${data.user}(${data.uuid})退出了${data.roomId}号房间`);
         delete cache.room[data.uuid];
         server.broadcast({
             action: "leaveRoom",
@@ -83,11 +84,10 @@ const actions = {
             roomId: data.roomId,
             color: data.color,
         });
-        console.log(`${data.user}(${data.uuid})退出了${data.roomId}号房间`);
     },
     close: (data, client) => {
-        delete cache.user[data.uuid];
         console.log(`${cache.user[data.uuid].user}(${data.uuid})退出游戏`);
+        delete cache.user[data.uuid];
     },
 };
 
