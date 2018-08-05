@@ -7,6 +7,9 @@ import {Views} from "../../enums/index";
 export default class BaseComponent extends React.Component{
     constructor(props){
         super(props);
+    }
+
+    checkLogin(){
         if (!sessionStorage.getItem(StoreKey.uuid)){
             this.props.history.push(Views.index.pathname);
         }

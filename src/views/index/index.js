@@ -2,11 +2,9 @@ import "./index.scss";
 import React from "react";
 import BaseComponent from "../base/index";
 import {Views} from "../../enums/index";
-import WebSocketClient from "../../utils/WebSocketClient";
-import Global from "../../utils/Global";
-import StoreKey from "../../utils/StoreKey";
+import {WebSocketClient, Global, StoreKey} from "../../utils/index";
 
-export default class Login extends React.Component {
+export default class Login extends BaseComponent {
     constructor(props) {
         super(props)
     }
@@ -19,7 +17,7 @@ export default class Login extends React.Component {
             success: () => {
                 this.props.history.push(Views.hall);
             },
-            error: () => {
+            onerror: (e) => {
                 alert("服务器连接失败！");
             },
         });

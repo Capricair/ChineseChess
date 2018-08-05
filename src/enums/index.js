@@ -5,7 +5,7 @@ import BoardSize from "./BoardSize";
 import MovePosCalc from "./MovePosCalc";
 import PieceTypeZH from "./PieceTypeZH";
 import ChineseNumeral from "./ChineseNumeral";
-import Views from "./Views";
+import Views from "../utils/Views";
 import PlayerStatus from "./PlayerStatus";
 
 export {

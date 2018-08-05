@@ -9,8 +9,11 @@
       vertical-align: middle;
 
       >div{
+        width: 100px;
         line-height: 30px;
         vertical-align: middle;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       >.icon-user{
@@ -21,7 +24,7 @@
 
       .list-table-image{
         width: 100px;
-        height: 100px;
+        height: 109px;
         margin-top: 5px;
         margin-bottom: 5px;
         background: url("../../../static/images/chessboard.jpg") no-repeat center;

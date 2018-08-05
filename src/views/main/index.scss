@@ -344,6 +344,47 @@ $brand-danger:  #d9534f;
           display: none;
         }
       }//.chess-book end
+
+      .players{
+        position: absolute;
+        top: 0;
+        left: -150px;
+        width: 100px;
+        height: 100%;
+        box-sizing: border-box;
+        text-align: center;
+
+        .player{
+          position: absolute;
+          top: 10%;
+          left: 0;
+          right: 0;
+          margin: auto;
+
+          &.active{
+            .avatar{
+              color: #fff;
+              background-color: $brand-primary;
+            }
+          }
+
+          &:last-child{
+            top: auto;
+            bottom: 10%;
+          }
+
+          .avatar{
+            width: 70px;
+            height: 70px;
+            line-height: 70px;
+            border-radius: 1000px;
+            background-color: #eee;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 10px;
+          }
+        }//.player end
+      }//.players end
     } //.wrapper end
   } //.container end
 }

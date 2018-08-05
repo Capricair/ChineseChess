@@ -57,13 +57,14 @@ function SetPawnProps(pawn) {
 export default class ChessBoard extends BaseComponent {
     static defaultProps = {
         perspective: PieceColor.Red,
+        ready: true,
         onMove: ()=>{},
     };
 
     constructor(props) {
         super(props);
         this.state = {
-            pieces: this.defaultPieces,
+            pieces: props.ready ? this.defaultPieces : [],
             active: PieceColor.Red,
             selected: this.defaultSelected,
             validPos: this.defaultValidPos,
@@ -233,7 +234,7 @@ export default class ChessBoard extends BaseComponent {
                     this.playVoice(voice);
                 }
                 if (typeof this.props.onMove === "function"){
-                    this.props.onMove(selected, from, to);
+                    this.props.onMove(selected, from, to, this.state.active);
                 }
             });
         }

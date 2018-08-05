@@ -1,5 +1,6 @@
 import Global from "../utils/Global";
 import StoreKey from "../utils/StoreKey";
+import PlayerStatus from "../enums/PlayerStatus";
 
 export default function WebSocketClient(options) {
     if (!options.uuid || !options.user) {
@@ -13,17 +14,30 @@ export default function WebSocketClient(options) {
     let defaults = {
         uuid: options.uuid,
         user: options.user,
-        error: () => {
-        },
         success: () => {
+        },
+        onerror: () => {
         },
     };
     let conf = Object.assign({}, defaults, options);
     let socket = new WebSocket("ws://localhost:9090");
     let actions = {};
 
+    Object.defineProperties(that, {
+        readyState: {
+            configurable: false,
+            get: function () {
+                return socket.readyState;
+            }
+        }
+    });
+
     that.send = function (data) {
         socket.send(JSON.stringify(data));
+    };
+
+    that.getAllRooms = function () {
+        that.send({action: "getAllRooms"});
     };
 
     that.enterRoom = function (roomId, color, status) {
@@ -36,6 +50,35 @@ export default function WebSocketClient(options) {
             status: status,
         });
     };
+
+    that.playerReady = function (roomId) {
+        that.send({
+            action: "playerReady",
+            uuid: conf.uuid,
+            user: conf.user,
+            roomId: roomId,
+            status: PlayerStatus.Ready,
+        })
+    };
+
+    that.getPlayersByRoomId = function (roomId) {
+        that.send({
+            action: "getPlayersByRoomId",
+            roomId: roomId,
+        })
+    };
+
+    that.leaveRoom = function (roomId, color) {
+        that.send({
+            action: "leaveRoom",
+            uuid: conf.uuid,
+            user: conf.user,
+            roomId: roomId,
+            color: color,
+        })
+    };
+
+    that.onerror = conf.onerror;
 
     socket.onopen = function (e) {
         if (conf.uuid && conf.user) {

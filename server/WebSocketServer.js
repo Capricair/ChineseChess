@@ -38,6 +38,7 @@ const actions = {
             color: data.color,
             status: data.status,
         });
+        console.log(`${data.user}(${data.uuid})进入${data.roomId}号房间`);
     },
     getAllRooms: (data, client) => {
         server.sendTo(client, {
@@ -45,14 +46,48 @@ const actions = {
             rooms: cache.room,
         })
     },
-    close: (data, client) => {
-        try {
-            console.log(`${(cache.user[data.uuid] || {}).user}(${data.uuid})退出游戏`);
-        } catch (e) {
-            console.log(data.uuid, cache);
+    getPlayersByRoomId: (data, client) => {
+        let players = Object.values(cache.room).filter(x => String(x.roomId) === String(data.roomId));
+        server.sendTo(client, {
+            action: "getPlayersByRoomId",
+            players: players,
+        })
+    },
+    playerReady: (data, client) => {
+        let self = cache.room[data.uuid];
+        if (self) {
+            self.status = parseInt(data.status);
+            let adversary = Object.values(cache.room).find(x => String(x.roomId) === String(self.roomId) && x.uuid !== data.uuid);
+            let adversaryClient, selfClient;
+            for (let item of server.clients) {
+                if (adversary && item.uuid === adversary.uuid) {
+                    adversaryClient = item;
+                } else if (item.uuid === self.uuid) {
+                    selfClient = item;
+                }
+            }
+            let response = {
+                action: "playerReady",
+                player: self,
+            };
+            adversaryClient && server.sendTo(adversaryClient, response);
+            server.sendTo(selfClient, response);
         }
-        delete cache.user[data.uuid];
+    },
+    leaveRoom: (data, client) => {
         delete cache.room[data.uuid];
+        server.broadcast({
+            action: "leaveRoom",
+            uuid: data.uuid,
+            user: data.user,
+            roomId: data.roomId,
+            color: data.color,
+        });
+        console.log(`${data.user}(${data.uuid})退出了${data.roomId}号房间`);
+    },
+    close: (data, client) => {
+        delete cache.user[data.uuid];
+        console.log(`${cache.user[data.uuid].user}(${data.uuid})退出游戏`);
     },
 };
 

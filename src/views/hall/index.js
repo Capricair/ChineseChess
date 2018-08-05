@@ -2,34 +2,58 @@ import "./index.scss";
 import React from "react";
 import BaseComponent from "../base/index";
 import classNames from "classnames";
-import {PieceColor, PlayerStatus} from "../../enums/index";
-import Global from "../../utils/Global";
+import {PieceColor, PlayerStatus, Views} from "../../enums/index";
+import {Global} from "../../utils/index";
+import StoreKey from "../../utils/StoreKey";
 
 let EmptySeatClass = "icomoon icon-user icon-empty";
 
 export default class Hall extends BaseComponent {
     constructor(props) {
         super(props);
+        super.checkLogin();
         this.state = {
             rooms: this.defaultRooms,
         };
-
         Global.socket.onmessage = (data) => {
-            if (data.action === "getAllRooms") {
-                Object.values(data.rooms).forEach((room) => {
-                    this.updateRooms(room);
-                })
-            }
-            if (data.action === "enterRoom") {
-                this.updateRooms(data);
+            let action = this.actions[data.action];
+            if (typeof action === "function"){
+                action.call(this, data);
             }
         };
+        this.initRoomsData();
+    }
 
-        Global.socket.onopen = function () {
-            this.send({
-                action: "getAllRooms",
-            });
-        };
+    actions = {
+        getAllRooms: (data)=>{
+            Object.values(data.rooms).forEach((room) => {
+                this.updateRooms(room);
+            })
+        },
+        enterRoom: (data)=>{
+            this.updateRooms(data);
+            if (data.uuid === sessionStorage.getItem(StoreKey.uuid)){
+                sessionStorage.setItem(StoreKey.roomId, data.roomId);
+                sessionStorage.setItem(StoreKey.color, data.color);
+                this.props.history.push(Views.game);
+            }
+        },
+        leaveRoom: (data)=>{
+            this.removePlayer(data);
+        }
+    };
+
+    initRoomsData(){
+        let roomId = parseInt(sessionStorage.getItem(StoreKey.roomId));
+        let color = parseInt(sessionStorage.getItem(StoreKey.color));
+        if (Global.socket.readyState === WebSocket.OPEN){
+            Global.socket.leaveRoom(roomId, color);
+            Global.socket.getAllRooms();
+        } else {
+            Global.socket.onopen = function () {
+                Global.socket.getAllRooms();
+            };
+        }
     }
 
     get defaultPlayer() {
@@ -47,6 +71,15 @@ export default class Hall extends BaseComponent {
             });
         }
         return rooms;
+    }
+
+    removePlayer(data){
+        let {rooms} = this.state;
+        let room = rooms.find(x => [x.red.uuid, x.black.uuid].includes(data.uuid));
+        data.color === PieceColor.Red ? room.red = this.defaultPlayer : room.black = this.defaultPlayer;
+        this.setState({
+            rooms: rooms
+        })
     }
 
     updateRooms(data) {
