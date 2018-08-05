@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "webpack --config=config/webpack.dev.js --mode development",
-    "build": "webpack --mode production",
+    "build": "webpack  --config=config/webpack.dev.js --mode production",
     "start": "webpack-dev-server --config=config/webpack.dev.js",
     "server": "node server/WebSocketServer.js"
   },
