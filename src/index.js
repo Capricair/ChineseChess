@@ -4,7 +4,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import {BrowserRouter, Route, Redirect} from "react-router-dom";
 
-import Login from "./views/login/index";
+import Login from "./views/index/index";
 import Hall from "./views/hall/index";
 import ChineseChess from "./views/main/index";
 

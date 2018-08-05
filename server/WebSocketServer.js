@@ -14,12 +14,22 @@ const cache = {
 };
 
 const actions = {
-    bindUser: (data, client)=>{
+    bindUser: (data, client) => {
+        console.log(`${data.user}(${data.uuid})进入游戏`);
         client.uuid = data.uuid;
-        cache.user[data.uuid] = {user: data.user};
+        cache.user[data.uuid] = {
+            uuid: data.uuid,
+            user: data.user,
+        };
     },
-    enterRoom: (data, client)=>{
-        cache.room[data.uuid] = {roomId: data.roomId, status: data.status};
+    enterRoom: (data, client) => {
+        cache.room[data.uuid] = {
+            uuid: data.uuid,
+            user: data.user,
+            roomId: data.roomId,
+            color: data.color,
+            status: data.status,
+        };
         server.broadcast({
             action: "enterRoom",
             uuid: data.uuid,
@@ -29,15 +39,24 @@ const actions = {
             status: data.status,
         });
     },
-    getAllRooms: (data, client)=>{
+    getAllRooms: (data, client) => {
         server.sendTo(client, {
             action: "getAllRooms",
             rooms: cache.room,
         })
-    }
+    },
+    close: (data, client) => {
+        try {
+            console.log(`${(cache.user[data.uuid] || {}).user}(${data.uuid})退出游戏`);
+        } catch (e) {
+            console.log(data.uuid, cache);
+        }
+        delete cache.user[data.uuid];
+        delete cache.room[data.uuid];
+    },
 };
 
-function parseJSON(str){
+function parseJSON(str) {
     let result = {};
     try {
         result = JSON.parse(str);
@@ -69,11 +88,12 @@ server.findClient = function (uuid) {
 
 const intervalId = setInterval(function () {
     server.clients.forEach(function (client) {
-        if (client.isAlive === false){
+        if (client.isAlive === false) {
             return client.terminate();
         }
         client.isAlive = false;
-        client.ping(function () {});
+        client.ping(function () {
+        });
     });
 }, 60 * 1000);
 
@@ -87,7 +107,7 @@ server.on("connection", function (client) {
         try {
             let data = parseJSON(message);
             let action = actions[data.action];
-            if (typeof action === "function"){
+            if (typeof action === "function") {
                 action(data, client);
             }
         } catch (e) {

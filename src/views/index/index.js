@@ -4,25 +4,34 @@ import BaseComponent from "../base/index";
 import {Views} from "../../enums/index";
 import WebSocketClient from "../../utils/WebSocketClient";
 import Global from "../../utils/Global";
+import StoreKey from "../../utils/StoreKey";
 
 export default class Login extends React.Component {
-    constructor(props){
+    constructor(props) {
         super(props)
     }
 
-    onSubmitHandler(e){
+    onSubmitHandler(e) {
         e.preventDefault();
         Global.socket = new WebSocketClient({
+            uuid: sessionStorage[StoreKey.uuid] || Global.UUID,
             user: this.refs[`txtNickName`].value,
+            success: () => {
+                this.props.history.push(Views.hall);
+            },
+            error: () => {
+                alert("服务器连接失败！");
+            },
         });
-        this.props.history.push(Views.hall);
     }
 
-    render(){
+    render() {
         return (
             <div className="login-form">
                 <div>
-                    <form onSubmit={(e)=>{this.onSubmitHandler(e)}}>
+                    <form onSubmit={(e) => {
+                        this.onSubmitHandler(e)
+                    }}>
                         <table>
                             <tbody>
                             <tr>
@@ -31,7 +40,9 @@ export default class Login extends React.Component {
                             </tr>
                             <tr>
                                 <td></td>
-                                <td><button type="submit">进入游戏大厅</button></td>
+                                <td>
+                                    <button type="submit">进入游戏大厅</button>
+                                </td>
                             </tr>
                             </tbody>
                         </table>

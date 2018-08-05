@@ -2,10 +2,21 @@ import Global from "../utils/Global";
 import StoreKey from "../utils/StoreKey";
 
 export default function WebSocketClient(options) {
+    if (!options.uuid || !options.user) {
+        if (typeof options.error === "function") {
+            options.error();
+        }
+        return false;
+    }
+
     let that = this;
     let defaults = {
         uuid: options.uuid,
         user: options.user,
+        error: () => {
+        },
+        success: () => {
+        },
     };
     let conf = Object.assign({}, defaults, options);
     let socket = new WebSocket("ws://localhost:9090");
@@ -27,16 +38,18 @@ export default function WebSocketClient(options) {
     };
 
     socket.onopen = function (e) {
-        if (!conf.uuid) {
-            conf.uuid = Global.UUID;
+        if (conf.uuid && conf.user) {
+            sessionStorage.setItem(StoreKey.uuid, conf.uuid);
+            sessionStorage.setItem(StoreKey.user, conf.user);
+            that.send({
+                action: "bindUser",
+                uuid: conf.uuid,
+                user: conf.user,
+            });
+            if (typeof conf.success === "function") {
+                conf.success();
+            }
         }
-        localStorage.setItem(StoreKey.uuid, conf.uuid);
-        localStorage.setItem(StoreKey.user, conf.user);
-        that.send({
-            action: "bindUser",
-            uuid: conf.uuid,
-            user: conf.user,
-        });
         if (typeof that.onopen === "function") {
             that.onopen(e);
         }

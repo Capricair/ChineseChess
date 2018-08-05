@@ -64,7 +64,11 @@ export default class Hall extends BaseComponent {
     }
 
     seatClickHandler(roomId, color, status) {
-        Global.socket.enterRoom(roomId, color, status);
+        let room = this.state.rooms[roomId];
+        let player = color === PieceColor.Red ? room.red : room.black;
+        if (!player.uuid){
+            Global.socket.enterRoom(roomId, color, status);
+        }
     }
 
     getRoomList() {
